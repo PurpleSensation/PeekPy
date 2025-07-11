@@ -1,0 +1,189 @@
+# CoreMarine Utils
+
+A professional utility library for maritime structural monitoring applications, developed by CoreMarine for offshore engineering environments where precision and reliability are paramount.
+
+## Overview
+
+This library provides a comprehensive set of tools for:
+- **Advanced Logging**: Hierarchical logging with visual formatting for complex engineering workflows
+- **CSV Data Processing**: Specialized tools for time-series sensor data manipulation
+- **Code Analysis**: Python code inspection and documentation tools
+- **Signal Processing**: Utilities for derivative computation and data validation
+
+## Features
+
+### 🚀 **Professional Logging System** (`log.py`)
+- Hierarchical indented output with visual separators
+- Console tables with automatic formatting
+- Progress bars and status indicators
+- Extensive Unicode character library for beautiful output
+- Performance tracking and method timing
+- Configurable debug levels and filtering
+
+### 📊 **CSV & Time Series Tools** (`toolsCSV.py`)
+- Time parsing with multiple format support
+- Automatic derivative computation (1st and 2nd order)
+- Stream separation by sensor ID
+- Data validation and cleaning utilities
+
+### 🔍 **Code Analysis Tools** (`peekPy.py`)
+- Python code indexing and navigation
+- Method and class documentation extraction
+- Reference tracking and dependency analysis
+- HTML report generation
+- Automatic code formatting and indentation fixes
+
+### ⚙️ **Pattern Detection** (`get_pattern_detector.py`)
+- Advanced pattern recognition for engineering data
+- Anomaly detection algorithms
+- Statistical analysis utilities
+
+## Installation & Usage
+
+### Option 1: Direct Integration (Recommended for Development)
+
+Clone this repository into your projects directory:
+
+```bash
+git clone https://github.com/core-marine-dev/CoreMarineUtils.git
+cd CoreMarineUtils
+```
+
+Then add the path to your Python projects:
+
+```python
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'path/to/CoreMarineUtils'))
+
+# Now you can import
+from coremarine_utils.log import Log, ConsoleTable, progressBar
+from coremarine_utils.toolsCSV import timeParse, splitCSV, diffCSV
+from coremarine_utils.peekPy import PeekPy
+```
+
+### Option 2: Virtual Environment Installation
+
+For isolated environments, you can install it as an editable package:
+
+```bash
+cd CoreMarineUtils
+pip install -e .
+```
+
+This allows you to modify the source code while having it available system-wide.
+
+### Option 3: Environment Variable Setup
+
+Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
+
+```bash
+export PYTHONPATH="${PYTHONPATH}:/path/to/CoreMarineUtils"
+```
+
+## Quick Start Examples
+
+### Hierarchical Logging
+```python
+from coremarine_utils.log import Log
+
+log = Log()
+log.up("Data Processing Pipeline")
+log("Loading sensor data...")
+log.up("Validation Phase")
+log("✓ GPS data validated")
+log("✓ Inclinometer data validated")
+log.down("Validation complete")
+log.down("Pipeline finished")
+```
+
+### CSV Processing
+```python
+from coremarine_utils.toolsCSV import timeParse, diffCSV
+
+# Parse time strings to seconds
+time_seconds = timeParse("2024-03-15 14:30:25.123")
+
+# Add derivatives to CSV data
+diffCSV("input_data.csv", "output_with_derivatives.csv")
+```
+
+### Code Analysis
+```python
+from coremarine_utils.peekPy import PeekPy
+
+# Analyze your codebase
+analyzer = PeekPy("./my_project")
+analyzer.peek("my_function", print_code=True)
+analyzer.report("main_class", max_depth=3, output_format='html')
+```
+
+## Project Structure
+
+```
+CoreMarineUtils/
+├── coremarine_utils/          # Main package
+│   ├── __init__.py           # Package initialization
+│   ├── log.py                # Advanced logging system
+│   ├── toolsCSV.py           # CSV and time-series utilities
+│   ├── peekPy.py             # Code analysis tools
+│   └── get_pattern_detector.py  # Pattern detection utilities
+├── examples/                 # Usage examples
+├── tests/                    # Unit tests
+├── docs/                     # Documentation
+├── requirements.txt          # Dependencies
+├── setup.py                  # Package configuration
+└── README.md                # This file
+```
+
+## Requirements
+
+- Python 3.8+
+- numpy >= 1.20.0
+- pandas >= 1.3.0
+- pygments >= 2.10.0 (for syntax highlighting)
+
+## Development
+
+This repository is designed to be easily modifiable. Key principles:
+
+1. **Self-contained**: No dependencies on external CoreMarine systems
+2. **Modular**: Each utility can be used independently
+3. **Well-documented**: Extensive docstrings and examples
+4. **Production-ready**: Used in critical offshore monitoring systems
+
+### Contributing
+
+When modifying the utilities:
+
+1. Test thoroughly - these tools are used in production environments
+2. Maintain backward compatibility when possible
+3. Update documentation and examples
+4. Follow the existing code style and patterns
+
+## Integration with TransFusion
+
+To integrate with your TransFusion project:
+
+```python
+# In your TransFusion scripts, replace:
+# from utils.log import Log
+
+# With:
+from coremarine_utils.log import Log
+```
+
+## License
+
+Commercial License - CoreMarine
+This software is proprietary and confidential.
+
+## Contact
+
+- **Author**: Dr. Hono Salval
+- **Company**: CoreMarine
+- **Use Case**: Maritime structural monitoring and offshore engineering
+
+---
+
+*Built for precision engineering where reliability matters.*
