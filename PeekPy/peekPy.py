@@ -1,5 +1,5 @@
 import math, os, ast, shutil
-from log import Log
+from .log import Log
 global log
 log :Log = Log()
 def set_log(l):

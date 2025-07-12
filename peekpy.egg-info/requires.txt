@@ -1,0 +1,11 @@
+numpy>=1.20.0
+pandas>=1.3.0
+
+[dev]
+pytest>=6.0
+black>=21.0
+flake8>=3.8
+
+[full]
+pygments>=2.10.0
+matplotlib>=3.3.0

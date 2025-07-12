@@ -2,6 +2,7 @@
 import time as tm, numpy as np
 import re, os, shutil, pathlib
 from typing import List, Dict, Optional, Union, Tuple
+from math import floor
 n_indent = 0
 
 class Log:
@@ -74,9 +75,10 @@ class Log:
         """
         # Handle skip mechanism: if skip() was called at current level, 
         # decrement the skip counter and bypass this up() call entirely
-        if self._skip_next and (self._skip_next == self.level):
-            self._skip_next -= 1
-            return self
+        if self._skip_next != False:
+            self._skip_next += 1
+            if self._skip_next == 2:                
+                return self
         
         # Increment indentation level (with bounds checking in _set_level)
         self._set_level(self.level + 1)
@@ -125,10 +127,17 @@ class Log:
         """
         # Handle skip mechanism: if skip was set for the level above current,
         # clear the skip flag and bypass this down() call
-        if self._skip_next and (self._skip_next+1 == self.level):
-            self._skip_next = 0
-            return self
+        if self._skip_next != False:
+            self._skip_next -= 1
+            if self._skip_next == 1:
+                self._skip_next = False
+                return self
+            elif self._skip_next == 0:
+                self.warning("down() was called after skip().")
+                self._skip_next = False
             
+        if self.level == 0:
+            self.warning(f"down() called from level 0 with header '{self._header_level[0]}'. Previous headers: {self._header_level}")
         # Calculate timing and retrieve scope information
         t_span: float = tm.time() - self._time_level[self.level]  # Time elapsed in this scope
         header = self._header_level[self.level]                   # Header for this scope
@@ -146,22 +155,17 @@ class Log:
             self._timelog[header][0] += 1      # Increment call count
             self._timelog[header][1] += t_span # Add elapsed time
         
-        # Store current level and prefix before decrementing for output logic
-        current_level = self.level
-        current_prefix = self.prefix  # Preserve original prefix for closure output
-        
+        current_prefix = str(self.prefix)  # Save current prefix for output alignment
         # Decrement the indentation level (handles bounds checking)
         self._set_level(self.level - 1)
-        new_level = self.level  # This is the level we're returning to
+        new_level = int(self.level)  # This is the level we're returning to
         
         # Skip output if globally muted
         if self.muted:
             return self
         
-        # Output formatting based on DEBUG level relative to new level:
-        
-        # Case 1: DEBUG > new_level (verbose mode - show full closure)
-        # Display complete scope closure with decorative elements and timing
+        # Output formatting based on DEBUG level relative to new level:        
+        # Case 1: DEBUG > new_level (verbose mode - show full closure): display complete scope closure with decorative elements and timing
         if self.DEBUG > new_level:
             # Only show closure if the scope had a meaningful header
             if header != "...":
@@ -175,7 +179,7 @@ class Log:
                 self.addItem(None)
                 
                 # Print scope completion using ORIGINAL level's prefix for proper alignment
-                print(f"{current_prefix[:-1]}╰{self.lines_sep[0][:20]} {exit_msg} {rnd_end}  • {t2str(t_span)}", end="", flush=True)
+                print(f"{current_prefix[:-1]}╰{self.lines_sep[0][:20]} {exit_msg} {rnd_end}  • {t2str(t_span)}", end=" ", flush=True)
                 self.blank()  # Add a blank line after the closure for readability
         
         # Case 2: DEBUG == new_level (minimal mode - complete the "..." message)
@@ -214,7 +218,7 @@ class Log:
         """
         if not self._skip_next:
             # Record the current level where skip was requested
-            self._skip_next = self.level
+            self._skip_next = 1
         else:
             self.warning("skip() already set, ignoring.")
         return self
@@ -248,9 +252,11 @@ class Log:
             self.warning(f"Log level {new_level} exceeds buffer size {self.n_buffer}. Clamping to {self.n_buffer - 1}.")
         elif new_level < 0:
             self.warning(f"Log level {new_level} is below 0. Clamping to 0.")
+            new_level = 0
+
             
         # Apply bounds: clamp between 0 and n_buffer-1
-        self.level = max(0, min(new_level, self.n_buffer - 1))
+        self.level = min(new_level, self.n_buffer - 1)
         
         # Update visual prefix: base "\n  " + vertical bars for each indentation level
         # Example: level 0 = "\n  ", level 1 = "\n   │", level 2 = "\n   │ │", etc.
@@ -258,6 +264,11 @@ class Log:
         return self
     def set_level(self, new_level: int): # public wrapper kept for compatibility
         return self._set_level(new_level)
+    def ground(self):
+        """Reset to root level (0) and clear all state except DEBUG."""
+        self.reset()._set_level(0)
+
+        return self
     def set_style(self, style: str):
         """ Set the style of the log output.
             Available styles:
@@ -313,7 +324,6 @@ class Log:
         debug_saved = self.DEBUG  # preserve verbosity
         self.__init__(self.logpath, self.n_buffer)
         self.DEBUG = debug_saved
-        self._skip_next = 0
         return self
 
     # ──────────────────────────────────────────────── logging api ──
@@ -324,18 +334,11 @@ class Log:
         self._streamConsole(f"{self.prefix} {message}")
         return self
     def warning(self, message: str):
-        message     = f"\033[93m{message}\033[0m"
         if self.DEBUG >= self.level:
-            self.log(f"⛔ {message}")
+            self(f"⛔ {message}")
         else:
-            tree_str = " > ".join(self._header_level[-self.level]) + ":"
-            if len(tree_str) > 30:
-                # Keep the last 30 characters of the tree string
-                tree_str = "..." + tree_str[-30:]
-            # make msg and tree str of a bright color
-            tree_str    = f"\033[93m{tree_str}\033[0m"  # Yellow color for warning
-              # Yellow color for warning
-            print(f"\n⛔ in {tree_str}\n      ─────> {message}")
+            tree_str = "/".join(self._header_level[: self.level + 1]) + "/"
+            print(f"\n⛔ in {tree_str}:\n ─────> {message}")
         return self
     def softlog(self, message: str):
         if self.muted or self.DEBUG < self.level:
@@ -348,10 +351,61 @@ class Log:
         return self
 
     # ───────────────────────────────────────────── misc loggers ──
+    def header(self, header: str):
+        """Prints a decorated header of somewhat bigger size, and resets level to 0."""
+        if self.muted or self.DEBUG < self.level:
+            return self
+        
+        # Reset to root level for headers
+        self._set_level(0)
+        
+        # ANSI escape codes for enhanced aesthetics
+        BOLD = '\033[1m'
+        BRIGHT_CYAN = '\033[96m'
+        BRIGHT_YELLOW = '\033[93m'
+        BRIGHT_MAGENTA = '\033[95m'
+        RESET = '\033[0m'
+        DIM = '\033[2m'
+        
+        # Create dynamic separators using existing patterns
+        header_len = len(header)
+        total_width = max(80, header_len + 20)
+        
+        # Top ornamental border with random separator
+        top_sep = np.random.choice(self.separators) if hasattr(self, 'separators') else "═══════════"
+        top_border = (top_sep * 3)[:total_width]
+        
+        # Create side ornaments
+        left_ornament = "▓▒░"
+        right_ornament = "░▒▓"
+        
+        # Mathematical/technical symbols for extra flair
+        symbols = "∫∑∇∆∂αβγδθλμπσφω⚡⚙⌬◊◈◇"
+        accent_symbol = np.random.choice(list(symbols))
+        
+        # Main header construction with Unicode art
+        padding = (total_width - header_len - 8) // 2
+        center_line = f"▓▒░{' ' * padding}{accent_symbol} {BOLD}{BRIGHT_CYAN}{header.upper()}{RESET} {accent_symbol}{' ' * padding}░▒▓"
+        
+        # Bottom border with different pattern
+        bottom_sep = np.random.choice(self.sep_ends) if hasattr(self, 'sep_ends') else "─────"
+        bottom_pattern = f"╰─{bottom_sep}{'─' * (total_width - len(bottom_sep) - 4)}{bottom_sep[::-1]}─╯"
+        
+        # Assemble the complete header
+        print(f"\n{BRIGHT_YELLOW}╭{'─' * (total_width - 2)}╮{RESET}")
+        print(f"{BRIGHT_YELLOW}│{RESET}{BRIGHT_MAGENTA}{top_border[:total_width-2]}{RESET}{BRIGHT_YELLOW}│{RESET}")
+        print(f"{BRIGHT_YELLOW}│{RESET}{center_line[:total_width-2]}{BRIGHT_YELLOW}│{RESET}")
+        print(f"{BRIGHT_YELLOW}│{RESET}{DIM}{' ' * (total_width-2)}{RESET}{BRIGHT_YELLOW}│{RESET}")
+        print(f"{BRIGHT_YELLOW}{bottom_pattern}{RESET}")
+        print(f"{DIM}   ◊ TransFusion Multi-Sensor Data Fusion System ◊{RESET}\n", flush=True)
+        
+        return self
+        
     def inline(self, message: str):
         if not self.muted and self.DEBUG >= self.level:
             print(f" {message}", end="", flush=True)
         return self
+    
     def blank(self):
         if not self.muted:
             self.log(" ")
@@ -366,7 +420,9 @@ class Log:
                 sep2 = np.random.choice(self.lines_sep)[:20]
                 self(f"   {sep1[::-1]} {title} {sep2}")
         return self
-    def itemize(self, items:List|Dict, header: str = "items", n_wrap: int = 50):
+    
+    
+    def itemize(self, items: Union[List, Dict], header: str = "items", n_wrap: int = 50):
         if not self.muted and self.DEBUG >= self.level:
             if isinstance(items, dict):
                 items = [f"{k}: {v}" for k, v in items.items()]
@@ -399,7 +455,8 @@ class Log:
         else:
             self.cumline += add
         return self
-    def list(self, items: List|Dict, 
+    
+    def list(self, items: Union[List, Dict], 
          header: str = "items", 
          style: str = "dash",
          numbered: bool = False,
@@ -488,7 +545,6 @@ class Log:
                 self.log(f"{item_indent}{marker} {formatted_item}")
         self.log(f"{item_indent[:-1]}╰───────────")
         return self
-
     def _group_items_by_type(self, items):
         """Group items by their type and return organized list."""
         from collections import defaultdict
@@ -519,7 +575,6 @@ class Log:
             result.extend(group_items)
         
         return result
-
     def _get_list_marker(self, index: int, style: str, numbered: bool, color_code: bool, item):
         """Generate appropriate list marker based on style and options."""
         if numbered or style == "number":
@@ -548,7 +603,6 @@ class Log:
             return "•"
         else:  # bullet (default)
             return "•"
-
     def _format_list_item(self, item: str, max_width: int, indent: str) -> str:
         """Format individual list item with optional width wrapping."""
         if max_width is None:
@@ -593,42 +647,37 @@ class Log:
         """
         if self.muted or self.DEBUG < self.level:
             return self
-        
-        # Calculate base indentation based on current level
-        # base_indent = "  " + " │" * self.level if self.level > 0 else "  "
-        base_indent = ""
-        
+
         # Root level - show header with decorative elements
-        header_sep = np.random.choice(self.sep_ends) if hasattr(self, 'sep_ends') else "─"
-        self.log(f"{base_indent} ╭─{header_sep} {header} {header_sep[::-1]}")
-        
+        self.log(f"⚙ {header}")
+
+        # Calculate base indentation based on current level
+        base_indent = " " * min(len(header), 2)
+
         # No data or empty container
         if not data:
             self.log(f"{base_indent}╰─ (empty)")
             return self
         
         # Process the nested structure recursively with proper indentation tracking
-        self._tree_recursive(data, base_indent, "", "", False, 0, max_depth, show_types)
+        self._tree_recursive(data, base_indent, " ", "", False, 0, max_depth, show_types)
         
         # Add closing line at root level
-        self.log(f"{base_indent}╰{'─' * (len(header) + 10)}")
+        self.blank()
         
         return self
-    
-    def _tree_recursive(self, data, level_indent, parent_indent, connector, 
-                      is_last_branch, depth, max_depth, show_types):
+    def _tree_recursive(self, data, level_indent,
+                        parent_indent, connector,
+                        is_last_branch, depth,
+                        max_depth, show_types):
         """Helper method for tree() to handle nested recursion with proper indentation."""
         # Stop if we've reached max depth
-        if max_depth is not None and depth > max_depth:
-            return
-        
+        if max_depth is not None and depth > max_depth: return        
         # No data or empty container
-        if not data:
-            return
+        if not data:    return       
         
         # Calculate this level's indentation
-        this_indent = parent_indent + connector
-        
+        base_indent = parent_indent + connector + " " * 3
         # Process each item
         items = list(data.items() if isinstance(data, dict) else enumerate(data))
         last_idx = len(items) - 1
@@ -636,9 +685,13 @@ class Log:
         for i, (key, value) in enumerate(items):
             # Determine if this is the last item at this level
             is_last = i == last_idx
+            is_first = i == 0
+
+            
+            this_indent = base_indent if is_first else base_indent
             
             # Choose the right branch character based on position
-            branch = " ╰─" if is_last else " ├─"
+            branch = " ╰─" if is_last else ("╰┬" if is_first else " ├─")
             
             # Create next level's connector
             next_connector = "   " if is_last else " │ "
@@ -646,7 +699,7 @@ class Log:
             # Handle nested dictionary
             if isinstance(value, dict) and value:
                 type_info = f" ({type(value).__name__})" if show_types else ""
-                self.log(f"{level_indent}{this_indent}{branch} {key}{type_info}:")
+                self.log(f"{level_indent}{this_indent}{branch}◻ {key}{type_info}")
                 
                 # Recursively process nested data
                 self._tree_recursive(value, level_indent, this_indent, 
@@ -701,10 +754,10 @@ class Log:
 class ConsoleTable:
     def __init__(self,
                  headers: list,
-                 log: Log,
+                 log: Log = None,
                  formats: list = None,
-                 padding: int = 0,
-                 margin: int = 2):
+                 header: str = "",
+                 compact: bool = False):
         """
         Initializes the ConsoleTable with a list of headers and an optional list of formats.
         The width of each column is determined by the maximum length of its header.
@@ -716,8 +769,10 @@ class ConsoleTable:
         :param padding: Padding between columns
         :param margin: Margin around the table
         """
-        self.log:Log = log
-
+        if log is None:
+            log = Log()
+        self.log: Log = log
+        log.blank()
         # define headers and formats
         self.headers: list = headers
         self.formats: list = formats if formats else ['{}'] * len(headers)
@@ -725,17 +780,29 @@ class ConsoleTable:
         # check formats and headers length
         if len(self.formats) != len(self.headers):
             raise ValueError("Number of formats must match the number of headers.")
-        
+
         # define padding and margin
-        self.margin:        str     = " " * margin         # Margin for the table
-        self.padding:       int     = padding     # Padding for each column
+        self.sep = " │ "
+        self.margin:        str     = "│"        # Margin for the table
+        self.padding:       int     = 0     # Padding for each column
 
         # Calculate widths based on headers
-        self.column_widths: list    = [len(header) for header in headers]
+        self.min_width: int = 5  # Minimum width for each column
+        self.col_widths: list    = [max(self.min_width, len(header))
+                                       for header in headers]
         self.rows:          list    = []
 
-        # Print headers immediately when the table is initialized    
-        self.__print_headers()
+        self.width = None
+        if compact:
+            # If compact mode is enabled, use a single space as padding
+            self.sep = " "
+            self.margin = "│"
+            # Substitute every space in headers for underbars _
+            self.headers = [header.replace(" ", "_") for header in self.headers]
+            # Print headers immediately when the table is initialized   
+            self.__print_headers(header)
+        else:
+            self.__print_headers(header)
     def add_row(self, *args):
         """ As input, accepts either as many positional arguments as there are headers"""
 
@@ -745,38 +812,54 @@ class ConsoleTable:
             raise ValueError("Row length does not match the number of headers.")
 
         # Format the row values and calculate widths
-        formatted_row = [
-            self.formats[i].format(item).replace('e+0', 'e').replace('e-0', 'e-') for i, item in enumerate(row)
-        ]
+        row = [self.formats[i].format(item).replace('e+0', 'e').replace('e-0', 'e-') for i, item in enumerate(row)]
 
         # Update column widths if necessary
-        self.column_widths = [
-            max(self.column_widths[i], len(formatted_row[i])) for i in range(len(row))
+        self.col_widths = [max(self.col_widths[i], len(row[i]), self.min_width)
+                           for i in range(len(row))
         ]
 
         # Store the formatted row (if needed later)
-        self.rows.append(formatted_row)
+        self.rows.append(row)
 
         # Print the newly added row
-        self.__print_row(formatted_row)
-    
-    def __print_headers(self):
-        """
-        Prints the headers of the table.
-        """
-        header_str = " | ".join(
-            header.ljust(self.column_widths[i]) for i, header in enumerate(self.headers)
-        )
-        self.log.log(self.margin + header_str)
+        self.__print_row(row)
+    def close(self):
+        """ Closes the table by printing a closing line."""
+        self.log(f"╰{'─'*(self.width - 2)}╯").blank()
+        return self
+    # private methods
+    def __add_padding(self, side: str = "right") -> str:
+        "Adds padding to the headers or rows based on the specified side."
+        pad = self.padding * " "
+        if side == "right":
+            self.headers = [header + pad for header in self.headers]
+        elif side == "left":
+            self.headers = [pad + header for header in self.headers]
+        elif side == "both":
+            self.headers = [pad + header + pad for header in self.headers]
+        self.col_widths: list    = [max(len(header), self.min_width)
+                                       for header in self.headers]
+
+    def __print_headers(self, header: str):
+        """Prints the headers of the table."""
+        cols_str    = self.sep.join(header.center(self.col_widths[i])
+                                 for i, header in enumerate(self.headers))
+        cols_str    = self.margin + cols_str + self.margin[::-1]
+        self.width  = len(cols_str)
+
+        line_len     = self.width - (len(header) + 4)
+        line         = np.random.choice(self.log.lines_sep)[:line_len//2]        
+        header_str  = f"╭{line} {header} {line}╮"
+        blank_str   = f"│{' '*(self.width-2)}│"
+        
+        self.log(header_str).log(blank_str).log(cols_str)
     def __print_row(self, row):
         """
         Prints a single row of data with the appropriate spacing.
         :param row: The row of formatted data to print
         """
-        row_str = " │ ".join(
-            str(item).ljust(self.column_widths[i]) for i, item in enumerate(row)
-        )
-        self.log.log(self.margin + row_str)
+        self.log(self.margin + self.sep.join(str(item).center(self.col_widths[i]) for i, item in enumerate(row)) + self.margin[::-1])
 
 class progressBar:
     """ A class to handle an inline progress bar using the Log instance.
@@ -787,7 +870,7 @@ class progressBar:
         current_bars (int): The number of bars currently printed.
         closed (bool): Whether the progress bar has been closed.
     """
-    def __init__(self, log: Log, total_length: int = 40, header: bool = True):
+    def __init__(self, log: Log, total_length: int = 60, header: str = "progress"):
         """
         Initializes the progress bar with a Log instance and total length.
         Args:
@@ -796,7 +879,7 @@ class progressBar:
             header (bool): Whether to print a header line before the bar.
         """
         self.log = log
-        self.total_length = total_length
+        self.total_length = int(total_length)
         self.current_bars = 0
         self.closed = False
         self._header_printed = header  # Track if header was printed
@@ -804,6 +887,9 @@ class progressBar:
         self.bars_samples = [
                             # '█', '▌', '▐', '▌', '█',
                             # '▓', '▒', '░',
+                            # Low, single character bars
+                            '█', '▇', '▆', '▅', '▄', '▃', '▂', '▁',
+
                             # Thiner bars
                             '▇', '▆', '▅', '▄', '▃', '▂', '▁',
                             # Thinner bars with different styles
@@ -812,8 +898,9 @@ class progressBar:
                             '■', '□']
         # self.char_bar = np.random.choice(self.bars_samples, 1)[0]
         if header:
-            self.header()
-        self.log.log("[")
+            self.header(header)
+        
+        self.log("├ ")
     def update(self, progress_factor: float):
         """
         Updates the progress bar by printing any additional bars.
@@ -840,12 +927,11 @@ class progressBar:
         Args:
             n_bars (int): The number of bars to add.
         """
-        if self.log.DEBUG == 0:
-            return self
-        elif self.log.DEBUG >= self.log.level:
-            print('▅' * n_bars, end="")
+        if self.log.DEBUG >= self.log.level:
+            n_bars = int(n_bars)
+            print('▄' * n_bars, end="")
         return self
-    def header(self):
+    def header(self, title: str = "progress"):
         """
         Logs a line before the bar, with indicators at the initial and final positions.
         For example:
@@ -854,7 +940,12 @@ class progressBar:
         """
         if self.closed:
             return
-        self.log.log(f"0%{' ' * (self.total_length - 2)}100%")
+        sep_half = ' ' * floor((self.total_length - len(title)) / 2 + 1)
+        box_top = f"╭{'─' * (self.total_length + 2)}╮"
+        box_len = len(box_top)
+        half_title = f"│ 0%{sep_half[:-3]}{title}"
+        self.log(box_top).log(half_title + " " * (box_len - len(half_title) - 6) + "100% │")
+        
         self.current_bars = 0
     def close(self):
         """
@@ -868,7 +959,9 @@ class progressBar:
         if self.log.DEBUG == 0:
             return self
         elif debug_ok:
-            print("]", end="", flush=True)
+            print(" ┤", end="")
+            self.log(f"╰{'─' * (self.total_length + 2)}╯")
+
     def remove(self):
         """
         Removes the progress bar and header lines from the console.
@@ -896,7 +989,7 @@ def t2str(time_val):
     elif time_val < 30*24*3600: return f"{time_val/(24*3600):.1f}d"
     elif time_val < 365*24*3600: return f"{time_val/(30*24*3600):.1f}mo"
     else: return f"{time_val/(365*24*3600):.1f}y"
-def toggle(script_dir: str | os.PathLike,
+def toggle(script_dir: Union[str, os.PathLike],
            comment: bool = True,
            prefix : str = "log",
            backup : bool = True,
@@ -1064,6 +1157,7 @@ class DebugChars:
     SINGLE = {
         'horizontal': '─',      # ─
         'vertical': '│',        # │
+        'bottom_horizontal': '─',  # ─
         'top_left': '┌',        # ┌
         'top_right': '┐',       # ┐
         'bottom_left': '└',     # └

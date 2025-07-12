@@ -9,7 +9,7 @@ import os
 this_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(this_dir)
 sys.path.append(os.path.dirname(this_dir))
-from PythonUtils.get_pattern_detector import replace_file_get_patterns
+from .get_pattern_detector import replace_file_get_patterns
 
 # Define the transFusion folder path
 transfusion_folder = r'transFusion'

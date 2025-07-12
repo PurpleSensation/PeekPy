@@ -18,7 +18,7 @@ Author: Dr. Hono Salval & CoreMarine Development Team
 import os
 import numpy as np
 import pandas as pd
-from PythonUtils.log import Log, t2str
+from .log import Log, t2str
 
 # Global logger instance - can be overridden by set_log()
 global log

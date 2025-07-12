@@ -28,7 +28,7 @@ try:
     from .log import Log, ConsoleTable, progressBar, t2str, DebugChars
     from .toolsCSV import timeParse, splitCSV, diffCSV, copyCSV
     from .peekPy import PeekPy, ConsoleStream, HTMLStream
-    from .get_pattern_detector import get_pattern_detector
+    from .get_pattern_detector import detect_get_patterns, replace_file_get_patterns, demo_patterns
     
     __all__ = [
         # Logging utilities
@@ -37,12 +37,14 @@ try:
         'timeParse', 'splitCSV', 'diffCSV', 'copyCSV',
         # Code analysis
         'PeekPy', 'ConsoleStream', 'HTMLStream',
+        'get_pattern_detector',
     ]
     
 except ImportError as e:
     # Graceful degradation for missing dependencies
     import warnings
-    warnings.warn(f"Some modules could not be imported: {e}")
+    if "No module named 'log'" not in str(e):  # Only warn for real issues
+        warnings.warn(f"Some modules could not be imported: {e}")
     __all__ = []
 
 def get_version():
