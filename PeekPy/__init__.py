@@ -25,14 +25,14 @@ __license__ = "Commercial"
 
 # Import main classes for convenience
 try:
-    from .log import Log, ConsoleTable, progressBar, t2str, DebugChars
+    from .log import Log, ConsoleTable, ProgressBar, t2str, DebugChars
     from .toolsCSV import timeParse, splitCSV, diffCSV, copyCSV
     from .peekPy import PeekPy, ConsoleStream, HTMLStream
     from .get_pattern_detector import detect_get_patterns, replace_file_get_patterns, demo_patterns
     
     __all__ = [
         # Logging utilities
-        'Log', 'ConsoleTable', 'progressBar', 't2str', 'DebugChars',
+        'Log', 'ConsoleTable', 'ProgressBar', 't2str', 'DebugChars',
         # CSV utilities  
         'timeParse', 'splitCSV', 'diffCSV', 'copyCSV',
         # Code analysis

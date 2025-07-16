@@ -57,7 +57,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'path/to/CoreMarineUtils'))
 
 # Now you can import
-from coremarine_utils.log import Log, ConsoleTable, progressBar
+from coremarine_utils.log import Log, ConsoleTable, ProgressBar
 from coremarine_utils.toolsCSV import timeParse, splitCSV, diffCSV
 from coremarine_utils.peekPy import PeekPy
 ```
