@@ -37,9 +37,6 @@ Zero external dependencies (just standard library).
 ## Basic Logging Usage
 
 ```python
-from PeekPy.log import Log
-
-log = Log()
 log.up("Starting process")
 log.log("Step 1 complete")
 log.log("Step 2 complete") 
