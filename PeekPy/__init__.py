@@ -1,27 +1,24 @@
 """
-CoreMarine Utilities Package
-============================
+PeekPy - Hierarchical Console Logging
+=====================================
 
-Professional utility library for maritime structural monitoring applications.
+Professional hierarchical logging utilities for Python applications.
 
 This package provides high-quality, production-ready tools for:
 - Advanced hierarchical logging with visual formatting
-- CSV and time-series data processing
-- Python code analysis and documentation
-- Signal processing and pattern detection
+- Console tables and progress bars
+- Python code analysis and documentation utilities
 
-Developed by CoreMarine for offshore engineering environments where
-precision and reliability are paramount.
+Released under CC0 - Public Domain Dedication.
 
-Author: Dr. Hono Salval & CoreMarine Development Team
-License: Commercial - CoreMarine
+Contributors: Open source community
+License: CC0 1.0 Universal (Public Domain)
 """
 
 __version__ = "1.0.0"
-__author__ = "Dr. Hono Salval"
-__email__ = "hono.salval@coremarine.com"
-__company__ = "CoreMarine"
-__license__ = "Commercial"
+__author__ = "PeekPy Contributors"
+__email__ = "contributors@github.com"
+__license__ = "CC0-1.0"
 
 # Import main classes for convenience
 try:
@@ -53,12 +50,11 @@ def get_version():
 def get_info():
     """Return package information."""
     return {
-        'name': 'CoreMarine Utils',
+        'name': 'PeekPy',
         'version': __version__,
         'author': __author__,
-        'company': __company__,
         'license': __license__,
-        'description': 'Professional utilities for maritime structural monitoring'
+        'description': 'Hierarchical console logging utilities for Python'
     }
 
 def setup_logging(style='minimal', debug_level=0):
@@ -82,9 +78,9 @@ def setup_logging(style='minimal', debug_level=0):
 
 # Package metadata for setup.py
 METADATA = {
-    'name': 'coremarine-utils',
+    'name': 'peekpy',
     'version': __version__,
-    'description': 'Professional utilities for maritime structural monitoring applications',
+    'description': 'Hierarchical console logging utilities for Python',
     'long_description': __doc__,
     'author': __author__,
     'author_email': __email__,

@@ -28,6 +28,8 @@ This ensures all modules share the **exact same logger instance** with synchroni
 
 ```bash
 git clone https://github.com/PurpleSensation/PeekPy.git
+cd PeekPy
+pip install -e .
 ```
 
 Import the logging module: `from PeekPy.log import Log`
