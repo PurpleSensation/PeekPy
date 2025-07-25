@@ -1,6 +1,6 @@
-# PeekPy - Simple Python Logging Tools
+# PeekPy - Hierarchical Console Logging
 
-A small collection of logging utilities I made for my own projects. The main component is a hierarchical logging system that I've been refining over time.
+A hierarchical logging system for Python that handles nested console logs with indentation and clean terminal output.
 
 ## Quick Start - Multi-Module Logging
 
@@ -39,24 +39,15 @@ def configure_debug_level(level):
 
 Then use in any module: `from your_project.logSingleton import get_shared_log; log = get_shared_log()`
 
-## What's in here
-
-- **Hierarchical logging** - Main feature, handles nested output with indentation
-- **Console tables** - Simple table formatting for terminal output  
-- **CSV utilities** - Basic time parsing and data processing tools
-- **Code analysis** - Some Python code inspection helpers
-
-The logging module is the most developed part. Everything else is just utility functions I needed along the way.
-
 ## Installation
-
-No pip package - just clone and import:
 
 ```bash
 git clone https://github.com/PurpleSensation/PeekPy.git
 ```
 
-Add to your Python path or copy the files you need. Zero external dependencies (just standard library).
+Import the logging module: `from PeekPy.log import Log`
+
+Zero external dependencies (just standard library).
 
 ## Basic Logging Usage
 
@@ -218,6 +209,6 @@ progress = log.progressBar(header="Processing")
 
 ## That's it
 
-Simple tools for console output and basic data processing. The logging system handles nesting automatically - just follow the `up()`/`down()` pattern and it tracks indentation levels for you.
+Simple hierarchical logging for console output. The system handles nesting automatically - just follow the `up()`/`down()` pattern and it tracks indentation levels for you.
 
 No fancy features, no complex configuration. Import and use.
