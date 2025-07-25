@@ -1,189 +1,223 @@
-# CoreMarine Utils
+# PeekPy - Simple Python Logging Tools
 
-A professional utility library for maritime structural monitoring applications, developed by CoreMarine for offshore engineering environments where precision and reliability are paramount.
+A small collection of logging utilities I made for my own projects. The main component is a hierarchical logging system that I've been refining over time.
 
-## Overview
+## Quick Start - Multi-Module Logging
 
-This library provides a comprehensive set of tools for:
-- **Advanced Logging**: Hierarchical logging with visual formatting for complex engineering workflows
-- **CSV Data Processing**: Specialized tools for time-series sensor data manipulation
-- **Code Analysis**: Python code inspection and documentation tools
-- **Signal Processing**: Utilities for derivative computation and data validation
-
-## Features
-
-### 🚀 **Professional Logging System** (`log.py`)
-- Hierarchical indented output with visual separators
-- Console tables with automatic formatting
-- Progress bars and status indicators
-- Extensive Unicode character library for beautiful output
-- Performance tracking and method timing
-- Configurable debug levels and filtering
-
-### 📊 **CSV & Time Series Tools** (`toolsCSV.py`)
-- Time parsing with multiple format support
-- Automatic derivative computation (1st and 2nd order)
-- Stream separation by sensor ID
-- Data validation and cleaning utilities
-
-### 🔍 **Code Analysis Tools** (`peekPy.py`)
-- Python code indexing and navigation
-- Method and class documentation extraction
-- Reference tracking and dependency analysis
-- HTML report generation
-- Automatic code formatting and indentation fixes
-
-### ⚙️ **Pattern Detection** (`get_pattern_detector.py`)
-- Advanced pattern recognition for engineering data
-- Anomaly detection algorithms
-- Statistical analysis utilities
-
-## Installation & Usage
-
-### Option 1: Direct Integration (Recommended for Development)
-
-Clone this repository into your projects directory:
-
-```bash
-git clone https://github.com/core-marine-dev/CoreMarineUtils.git
-cd CoreMarineUtils
-```
-
-Then add the path to your Python projects:
+For projects that need shared logging across multiple modules, create a simple singleton in your main project:
 
 ```python
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'path/to/CoreMarineUtils'))
+# your_project/logSingleton.py
+import threading
+from PeekPy.log import Log
 
-# Now you can import
-from coremarine_utils.log import Log, ConsoleTable, ProgressBar
-from coremarine_utils.toolsCSV import timeParse, splitCSV, diffCSV
-from coremarine_utils.peekPy import PeekPy
+class LogSingleton:
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance.logger = Log()
+        return cls._instance
+    
+    def get_shared_log(self):
+        return self.logger
+
+_singleton = LogSingleton()
+
+def get_shared_log():
+    return _singleton.get_shared_log()
+
+def configure_debug_level(level):
+    logger = get_shared_log()
+    logger.DEBUG = level
+    return logger
 ```
 
-### Option 2: Virtual Environment Installation
+Then use in any module: `from your_project.logSingleton import get_shared_log; log = get_shared_log()`
 
-For isolated environments, you can install it as an editable package:
+## What's in here
+
+- **Hierarchical logging** - Main feature, handles nested output with indentation
+- **Console tables** - Simple table formatting for terminal output  
+- **CSV utilities** - Basic time parsing and data processing tools
+- **Code analysis** - Some Python code inspection helpers
+
+The logging module is the most developed part. Everything else is just utility functions I needed along the way.
+
+## Installation
+
+No pip package - just clone and import:
 
 ```bash
-cd CoreMarineUtils
-pip install -e .
+git clone https://github.com/PurpleSensation/PeekPy.git
 ```
 
-This allows you to modify the source code while having it available system-wide.
+Add to your Python path or copy the files you need. Zero external dependencies (just standard library).
 
-### Option 3: Environment Variable Setup
+## Basic Logging Usage
 
-Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
-
-```bash
-export PYTHONPATH="${PYTHONPATH}:/path/to/CoreMarineUtils"
-```
-
-## Quick Start Examples
-
-### Hierarchical Logging
 ```python
-from coremarine_utils.log import Log
+from PeekPy.log import Log
 
 log = Log()
-log.up("Data Processing Pipeline")
-log("Loading sensor data...")
-log.up("Validation Phase")
-log("✓ GPS data validated")
-log("✓ Inclinometer data validated")
-log.down("Validation complete")
-log.down("Pipeline finished")
+log.up("Starting process")
+log.log("Step 1 complete")
+log.log("Step 2 complete") 
+log.down("Process finished")
 ```
 
-### CSV Processing
-```python
-from coremarine_utils.toolsCSV import timeParse, diffCSV
-
-# Parse time strings to seconds
-time_seconds = timeParse("2024-03-15 14:30:25.123")
-
-# Add derivatives to CSV data
-diffCSV("input_data.csv", "output_with_derivatives.csv")
+Output:
+```
+◻ ────── Starting process ──────
+ │ Step 1 complete
+ │ Step 2 complete
+◻ ──── Process finished ────
 ```
 
-### Code Analysis
-```python
-from coremarine_utils.peekPy import PeekPy
+## Shared Logger Pattern
 
-# Analyze your codebase
-analyzer = PeekPy("./my_project")
-analyzer.peek("my_function", print_code=True)
-analyzer.report("main_class", max_depth=3, output_format='html')
-```
+For projects needing synchronized logging across multiple modules, **we recommend implementing a simple singleton in your main project** rather than relying on PeekPy's built-in shared logging (which can be unreliable in complex scenarios).
 
-## Project Structure
+### Recommended Approach - Local Singleton:
 
-```
-CoreMarineUtils/
-├── coremarine_utils/          # Main package
-│   ├── __init__.py           # Package initialization
-│   ├── log.py                # Advanced logging system
-│   ├── toolsCSV.py           # CSV and time-series utilities
-│   ├── peekPy.py             # Code analysis tools
-│   └── get_pattern_detector.py  # Pattern detection utilities
-├── examples/                 # Usage examples
-├── tests/                    # Unit tests
-├── docs/                     # Documentation
-├── requirements.txt          # Dependencies
-├── setup.py                  # Package configuration
-└── README.md                # This file
-```
-
-## Requirements
-
-- Python 3.8+
-- numpy >= 1.20.0
-- pandas >= 1.3.0
-- pygments >= 2.10.0 (for syntax highlighting)
-
-## Development
-
-This repository is designed to be easily modifiable. Key principles:
-
-1. **Self-contained**: No dependencies on external CoreMarine systems
-2. **Modular**: Each utility can be used independently
-3. **Well-documented**: Extensive docstrings and examples
-4. **Production-ready**: Used in critical offshore monitoring systems
-
-### Contributing
-
-When modifying the utilities:
-
-1. Test thoroughly - these tools are used in production environments
-2. Maintain backward compatibility when possible
-3. Update documentation and examples
-4. Follow the existing code style and patterns
-
-## Integration with TransFusion
-
-To integrate with your TransFusion project:
+Create this in your main project:
 
 ```python
-# In your TransFusion scripts, replace:
-# from utils.log import Log
+# your_project/logSingleton.py
+import threading
+from PeekPy.log import Log
 
-# With:
-from coremarine_utils.log import Log
+class LogSingleton:
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance.logger = Log()
+        return cls._instance
+    
+    def get_shared_log(self):
+        return self.logger
+
+_singleton = LogSingleton()
+
+def get_shared_log():
+    return _singleton.get_shared_log()
+
+def configure_debug_level(level):
+    logger = get_shared_log()
+    logger.DEBUG = level
+    return logger
 ```
 
-## License
+Then create a clean interface:
 
-Commercial License - CoreMarine
-This software is proprietary and confidential.
+```python
+# your_project/logging_interface.py  
+from .logSingleton import get_shared_log, configure_debug_level
 
-## Contact
+log = get_shared_log()
 
-- **Author**: Dr. Hono Salval
-- **Company**: CoreMarine
-- **Use Case**: Maritime structural monitoring and offshore engineering
+def debug(level=0):
+    return configure_debug_level(level)
+```
 
----
+Use in any module:
 
-*Built for precision engineering where reliability matters.*
+```python
+# your_project/any_module.py
+from .logging_interface import log
+
+def process_data():
+    log.up("Processing sensor data")
+    log.log("Loading files...")
+    log.down("Complete")
+```
+
+This ensures all modules share the **exact same logger instance** with synchronized debug levels.
+
+### Alternative - PeekPy Built-in (Less Reliable):
+
+```python
+# your_project/__init__.py
+from PeekPy.log import configure_shared_logging, get_shared_logger
+
+def debug(level=0):
+    return configure_shared_logging(level=level)
+
+# your_project/some_module.py
+from PeekPy.log import get_shared_logger
+log = get_shared_logger()
+```
+
+**Note:** The built-in shared logging can sometimes create multiple instances in complex import scenarios. For critical applications, use the local singleton approach above.
+
+## Debug Levels
+
+Debug levels control the maximum nesting depth that will show output:
+- **DEBUG >= level**: Shows full decorated output with brackets and timing
+- **DEBUG == level-1**: Shows minimal "header..." format  
+- **DEBUG < level**: Suppresses all output for that level
+
+Example: If `DEBUG=1`, you'll see levels 0 and 1, but level 2+ will be silent.
+
+## Other Logging Types
+
+```python
+log.log("Regular message")           # Standard log
+log.softlog("Status update")         # Overwrites previous line
+log.inline("continued...")           # Continues current line
+log.warning("Something's wrong")     # Warning message
+log.blank()                          # Empty line
+```
+
+## Console Tables
+
+```python
+table = log.consoleTable(
+    headers=["Name", "Value", "Status"], 
+    formats=["{}", "{:.2f}", "{}"],
+    title="Results"
+)
+table.add_row("Item1", 3.14159, "OK")
+table.add_row("Item2", 2.71828, "PASS") 
+table.close()
+```
+
+## Lists and Trees
+
+```python
+# List items with various formatting options
+log.list(["item1", "item2", "item3"], header="My Items", style="dash")
+
+# Display nested data as a tree structure  
+data = {"config": {"db": "localhost", "port": 5432}, "status": "active"}
+log.tree(data, header="Configuration", show_types=True)
+
+# Simple itemized lists
+log.itemize([
+    "Process started",
+    "Data loaded", 
+    "Calculations complete"
+], "Status Updates")
+```
+
+## Progress Bars
+
+```python
+progress = log.progressBar(header="Processing")
+# Use progress methods for tracking long operations
+```
+
+## That's it
+
+Simple tools for console output and basic data processing. The logging system handles nesting automatically - just follow the `up()`/`down()` pattern and it tracks indentation levels for you.
+
+No fancy features, no complex configuration. Import and use.
