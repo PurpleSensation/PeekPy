@@ -4,40 +4,25 @@ A hierarchical logging system for Python that handles nested console logs with i
 
 ## Quick Start - Multi-Module Logging
 
-For projects that need shared logging across multiple modules, create a simple singleton in your main project:
+For projects that need shared logging across multiple modules, copy the `PeekPy/logSingleton.py` file to your project and use it:
 
 ```python
-# your_project/logSingleton.py
-import threading
-from PeekPy.log import Log
+# Copy PeekPy/logSingleton.py to your_project/logSingleton.py
+# Then use in any module:
+from your_project.logSingleton import get_shared_log, configure_debug_level
 
-class LogSingleton:
-    _instance = None
-    _lock = threading.Lock()
-    
-    def __new__(cls):
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance.logger = Log()
-        return cls._instance
-    
-    def get_shared_log(self):
-        return self.logger
+log = get_shared_log()
 
-_singleton = LogSingleton()
+def process_data():
+    log.up("Processing sensor data")
+    log.log("Loading files...")
+    log.down("Complete")
 
-def get_shared_log():
-    return _singleton.get_shared_log()
-
-def configure_debug_level(level):
-    logger = get_shared_log()
-    logger.DEBUG = level
-    return logger
+# Configure debug level from anywhere:
+configure_debug_level(2)  # All modules get this level
 ```
 
-Then use in any module: `from your_project.logSingleton import get_shared_log; log = get_shared_log()`
+This ensures all modules share the **exact same logger instance** with synchronized debug levels.
 
 ## Installation
 
@@ -73,63 +58,23 @@ Output:
 
 For projects needing synchronized logging across multiple modules, **we recommend implementing a simple singleton in your main project** rather than relying on PeekPy's built-in shared logging (which can be unreliable in complex scenarios).
 
-### Recommended Approach - Local Singleton:
+### Recommended Approach - Copy the Singleton:
 
-Create this in your main project:
-
-```python
-# your_project/logSingleton.py
-import threading
-from PeekPy.log import Log
-
-class LogSingleton:
-    _instance = None
-    _lock = threading.Lock()
-    
-    def __new__(cls):
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance.logger = Log()
-        return cls._instance
-    
-    def get_shared_log(self):
-        return self.logger
-
-_singleton = LogSingleton()
-
-def get_shared_log():
-    return _singleton.get_shared_log()
-
-def configure_debug_level(level):
-    logger = get_shared_log()
-    logger.DEBUG = level
-    return logger
-```
-
-Then create a clean interface:
+Copy `PeekPy/logSingleton.py` to your project and use it:
 
 ```python
-# your_project/logging_interface.py  
-from .logSingleton import get_shared_log, configure_debug_level
+# Copy PeekPy/logSingleton.py to your_project/logSingleton.py
+from your_project.logSingleton import get_shared_log, configure_debug_level
 
 log = get_shared_log()
-
-def debug(level=0):
-    return configure_debug_level(level)
-```
-
-Use in any module:
-
-```python
-# your_project/any_module.py
-from .logging_interface import log
 
 def process_data():
     log.up("Processing sensor data")
     log.log("Loading files...")
     log.down("Complete")
+
+# Set debug level from anywhere - all modules get it:
+configure_debug_level(2)
 ```
 
 This ensures all modules share the **exact same logger instance** with synchronized debug levels.
