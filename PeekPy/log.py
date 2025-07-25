@@ -265,6 +265,7 @@ class DebugChars:
         'tau': 'τ',                # τ
         'phi': 'φ',                # φ
         'omega': 'ω',              # ω
+        'rho': 'ρ',                # ρ
     }
     
     # ═══════════════════════════════════════════════════════════════════════════════
@@ -826,7 +827,7 @@ class TreeRenderer:
         if self.log.muted or self.log.DEBUG < self.log.level:
             return
             # Calculate base indentation
-        base_indent = "│ "
+        base_indent = "  "
         # Show header with matching indentation
         self.log(f"{base_indent}⚙ {header}")
 
@@ -853,7 +854,7 @@ class TreeRenderer:
         item_widths = []
         
         for key, value in items:
-            lines = self._generate_lines(key, value, max_depth, show_types, 0)
+            lines = self._generate_lines(key, value, show_types)
             item_contents.append(lines)
             # Calculate the actual width needed for this item (no truncation)
             max_width = max(len(line) for line in lines) if lines else 0
@@ -929,7 +930,7 @@ class TreeRenderer:
         max_height = max(len(item) for item in group_items) if group_items else 0
         
         for line_idx in range(max_height):
-            line_parts = [base_indent + "  │"]
+            line_parts = [base_indent + "  "]
             
             for col_idx, item_lines in enumerate(group_items):
                 if col_idx < len(group_widths):
@@ -963,65 +964,73 @@ class TreeRenderer:
         
         return rows
     
-    def _generate_lines(self, key: str, value, max_depth: int, 
-                           show_types: bool, col_idx: int) -> List[str]:
+    def _generate_lines(self, key: str, items: list|dict, 
+                           show_types: bool) -> List[str]:
         """Generate tree lines for a single item."""
         lines = []
-             
-        if isinstance(value, dict) and value:
-            type_info = f" ({type(value).__name__})" if show_types else ""
-            lines.append(f" ╰ {key}{type_info}:")            
+        connector = "  "
+        lines.append(f" ─┬○ {key.title()}:")     
+        if isinstance(items, dict) and len(items) > 1:
+            type_info = f" ({type(items).__name__})" if show_types else ""
+            
             # Process nested items
-            sub_items = list(value.items())
+            sub_items = list(items.items())
             for i, (sub_key, sub_value) in enumerate(sub_items):
                 is_last = i == len(sub_items) - 1
-                
-                if isinstance(sub_value, (dict, list, tuple)) and sub_value:
-                    # Nested structure
-                    connector = ""
-                    branch = "╰┬ " if is_last else "├┬ "
-                    lines.append(f"{connector}{branch}{sub_key}")
+                next_connector  = "  "       if is_last else "│ "
+                if isinstance(sub_items, dict) and len(items) > 1:
+                    # Nested structure                    
+                    branch          = "╰─┬○ "    if is_last else "├─┬○ "
+                    lines.append(f"{connector}{branch}{sub_key.title()}:")
                     
-                    # Handle list content
-                    if isinstance(sub_value, list):
-                        display_items = sub_value[:3]
-                        for j, item in enumerate(display_items):
-                            is_item_last = j == len(display_items) - 1 and len(sub_value) <= 3
-                            item_branch = "╰─ " if is_item_last else "├─ "
-                            next_connector = "       " if is_last else " │     "
-                            lines.append(f"{connector}{next_connector}{item_branch}{item}")
+                # Handle list content
+                if isinstance(sub_value, list):
+                    for j, item in enumerate(sub_value):
+                        if j == len(sub_value) - 1:
+                            branch = "  ╰─ "
+                        elif (j == 0):
+                            branch = "╰─┬─ "                            
+                        else:
+                            branch = "  ├─ "
                         
-                        if len(sub_value) > 3:
-                            next_connector = "       " if is_last else " │     "
-                            lines.append(f"{connector}{next_connector}╰─ ... and {len(sub_value) - 3} more")
+                        lines.append(f"{connector}{next_connector}{branch}{item}")
+
                 else:
                     # Leaf node
-                    connector = "   "
-                    branch = "╰─ " if is_last else "├─ "
+                    if i == 0:
+                        branch = "╰─┬─ "
+                    elif i == len(sub_items) - 1:
+                        branch = "  ╰─ "
+                    else:
+                        branch = "  ├─ "
                     type_info_leaf = f" ({type(sub_value).__name__})" if show_types else ""
                     lines.append(f"{connector}{branch}{sub_key} = {sub_value}{type_info_leaf}")
         
-        elif isinstance(value, (list, tuple)) and value:
-            count_info = f"[{len(value)} items]"
-            type_info = f" ({type(value).__name__})" if show_types else ""
-            lines.append(f"  ╰─ {key}{type_info} {count_info}")
-            
-            # Process list items (limit to 3)
-            display_items = value[:3]
+        elif isinstance(items, (list, tuple)) and items:
+            # Process list items
+            display_items = items
             for j, item in enumerate(display_items):
-                item_is_last = j == len(display_items) - 1 and len(value) <= 3
-                item_branch = "╰─ " if item_is_last else "├─ "
-                connector = "      "
+                is_last = j == len(display_items) - 1
+                # Leaf node
+                is_first = (j == 0)
+                if is_last:
+                    branch = " ╰─ "
+                elif is_first:
+                    branch = "╰┬─ "                
+                else:
+                    branch = " ├─ "
                 item_type = f" ({type(item).__name__})" if show_types else ""
-                lines.append(f"{connector}{item_branch}{item}{item_type}")
+                lines.append(f"{connector}{branch}{item}{item_type}")
             
-            if len(value) > 3:
-                lines.append(f"      ╰─ ... and {len(value) - 3} more")
         
         # Handle leaf node
         else:
-            type_info = f" ({type(value).__name__})" if show_types else ""
-            lines.append(f"  ╰─ {key}: {value}{type_info}")
+            type_info = f" ({type(items).__name__})" if show_types else ""
+            lines.append(f" ╰─ {key}: {items}{type_info}")
+            is_last = True
+
+        if is_last:
+            lines.append("")
         
         return lines
     
@@ -1055,10 +1064,10 @@ class TreeRenderer:
         sep_parts = [base_indent + "  ├─"]
         # connector = DebugChars.SINGLE['tee_down']
         connector = "○"
-        sep_parts.append(connector + "─"*10)
-        sep_parts.extend([" " * (col_widths[i - 1] + 3 - 12) + "─"*2 + connector + "─" * 10 for i in range(1, len(col_widths))])
+        # sep_parts.append(connector + "─"*10)
+        # sep_parts.extend([" " * (col_widths[i - 1] + 3 - 12) + "─"*2 + connector + "─" * 10 for i in range(1, len(col_widths))])
         
-        self.log("".join(sep_parts))
+        # self.log("".join(sep_parts))
     
     def _single_column(self, data, base_indent: str, max_depth: int, show_types: bool):
         """Render traditional single-column tree (delegates to existing method)."""
@@ -1096,8 +1105,7 @@ class Log:
         
         self.DEBUG: int = 0                    # output visibility threshold  
         self.level: int = 0                    # current nesting/indentation level
-        self.muted: bool = False               # global mute flag
-        self._mute_level: Optional[int] = None # indent level where mute started
+        
 
         # runtime house‑keeping
         self.logpath:   str     = logpath
@@ -1105,17 +1113,18 @@ class Log:
         self.prefix:    str     = "\n  "      # visual indentation string (updated by _set_level)
         self.softflag:  bool    = False
         self.cumline:   str     = None
-        self.l_count:   int     = 0           # line counter for current scope
 
         # time + header ring buffers (indexed by level)
         self._time_level:    List[float]     = [0.0] * n_buffer    # start time for each level
-        self._header_level:  List[str]       = ["..."] * n_buffer # header text for each level
+        self._header_level:  List[str]       = [None] * n_buffer # header text for each level
 
         # history log (for performance analysis)
         self._h_log:     bool                    = False
         self._timelog:   Dict[str, List[float]]  = {}  # header -> [call_count, total_time]
 
         # special control mechanisms
+        self.muted: bool = False               # global mute flag
+        self._mute_level: Optional[int] = None # indent level where mute started
         self._tracking:  bool                    = False    # method tracking mode flag
         self._skip_next:  int                    = False    # level to skip (for conditional suppression)
         
@@ -1132,7 +1141,7 @@ class Log:
         return self
     
     # ─────────────────────────────────────────────────────── up & down ──
-    def up(self, header: str = "..."):
+    def up(self, header: str = None):
         """Increase indentation level (clamped to *n_buffer‑1*).
         
         Creates a new scope level for hierarchical logging with timing and visual indentation.
@@ -1145,7 +1154,7 @@ class Log:
         """
         # Handle skip mechanism: if skip() was called at current level, 
         # decrement the skip counter and bypass this up() call entirely
-        if self._skip_next != False:
+        if self._skip_next:
             self._skip_next += 1
             if self._skip_next == 2:                
                 return self
@@ -1154,35 +1163,25 @@ class Log:
         self._set_level(self.level + 1)
         
         # Initialize counters and timing for this new level
-        self.l_count = 0  # Reset line count for this scope
         self._time_level[self.level] = tm.time()  # Start timing this scope
-        self._header_level[self.level] = header   # Store header for this level
-        
+        self._header_level[self.level] = header   # Store header for this level        
         # Early exit if globally muted
-        if self.muted:
-            return self
+        if self.muted:  return self
             
         # Output formatting depends on DEBUG level relative to new level:
-        
         # Case 1: DEBUG >= new level (full verbose mode)
-        # Show decorated header with hline containing level information
         if self.DEBUG >= self.level:
-            if header != "...":  # Only show if meaningful header
+            if header != None:  # Only show if meaningful header
                 rnd_start = np.random.choice(self.separators)[:40]
                 rnd_end = np.random.choice(self.separators)[:10]
                 decorated_header = f"{self.prefix[:-2]}{self.prefix[:-1]}◻ {rnd_start} {header} {rnd_end}"
                 # Truncate to prevent overly long lines (75 char limit)
                 print(decorated_header[:min(75, len(decorated_header))], end="", flush=True)
             
-        # Case 2: DEBUG == new_level-1 (minimal parent visibility mode)
-        # Show simple "header..." format if header is provided
+        # Case 2: DEBUG == new_level-1
         elif self.DEBUG == self.level - 1:
-            if header != "...":  # Only show if meaningful header
+            if header != None:  # Only show if meaningful header
                 print(f"{self.prefix[:-1]}{header}... ", end="", flush=True)
-                
-        # Case 3: DEBUG < new_level-1 (suppressed)
-        # No output - completely silent
-        
         return self
     def down(self, exit_msg: Union[str, bool] = False):
         """Decrease indentation level and display scope completion with timing.
@@ -1192,7 +1191,7 @@ class Log:
         
         Output behavior:
         - DEBUG > new_level: Show full closure with bracket/separator and timing
-        - DEBUG == new_level: Complete the "..." message with inline exit_msg and timing
+        - DEBUG == new_level: Complete the None message with inline exit_msg and timing
         - DEBUG < new_level: Suppress all output
         """
         # Handle skip mechanism: if skip was set for the level above current,
@@ -1203,15 +1202,15 @@ class Log:
                 self._skip_next = False
                 return self
             elif self._skip_next == 0:
-                self.warning("down() was called after skip().")
+                # self.warning("down() was called after skip().")
                 self._skip_next = False
             
         if self.level == 0:
             self.warning(f"down() called from level 0 with header '{self._header_level[0]}'. Previous headers: {self._header_level}")
         # Calculate timing and retrieve scope information
-        t_span: float = tm.time() - self._time_level[self.level]  # Time elapsed in this scope
-        header = self._header_level[self.level]                   # Header for this scope
-        self.l_count += 1  # Increment line count for this scope
+        t_span: float = tm.time() - self._time_level[self.level]    # Time elapsed in this scope
+        header = self._header_level[self.level]     # Header for this scope
+        # Increment line count for this scope
         
         # Handle method tracking: stop tracking if we're closing the tracked scope
         if self.level == self._tracking:
@@ -1227,18 +1226,16 @@ class Log:
         
         current_prefix = str(self.prefix)  # Save current prefix for output alignment
         # Decrement the indentation level (handles bounds checking)
+        
         self._set_level(self.level - 1)
-        new_level = int(self.level)  # This is the level we're returning to
-        
         # Skip output if globally muted
-        if self.muted:
-            return self
-        
+        if self.muted: return self
         # Output formatting based on DEBUG level relative to new level:        
         # Case 1: DEBUG > new_level (verbose mode - show full closure): display complete scope closure with decorative elements and timing
-        if self.DEBUG > new_level:
+        # print((self.DEBUG, self.level, header))
+        if self.DEBUG > self.level:
             # Only show closure if the scope had a meaningful header
-            if header != "...":
+            if header != None:
                 rnd_end = np.random.choice(self.sep_ends)
                 
                 # Default exit message if none provided
@@ -1249,24 +1246,20 @@ class Log:
                 self.addItem(None)
                 
                 # Print scope completion using ORIGINAL level's prefix for proper alignment
-                print(f"{current_prefix[:-1]}╰{self.lines_sep[0][:20]} {exit_msg} {rnd_end}  • {t2str(t_span)}", end=" ", flush=True)
+                print(f"{current_prefix[:-1]}◻{self.lines_sep[0][:20]} {exit_msg} {rnd_end}  • {t2str(t_span)}", end="", flush=True)
                 self.blank()  # Add a blank line after the closure for readability
         
-        # Case 2: DEBUG == new_level (minimal mode - complete the "..." message)
+        # Case 2: DEBUG == new_level (minimal mode - complete the None message)
         # Show inline completion for the scope that was opened with "header..."
-        elif self.DEBUG == new_level:
+        elif self.DEBUG == self.level:
             # Only show completion if the scope had a meaningful header
-            if header != "...":
+            if header != None:
                 if exit_msg is False:
                     # No explicit exit message - just show success tick and timing
                     self.inline(f"done  • {t2str(t_span)}")
                 else:
                     # Show provided exit message with timing
                     self.inline(f"{exit_msg}  • {t2str(t_span)}")
-                    
-        # Case 3: DEBUG < new_level (suppressed)
-        # No output - completely silent
-        
         return self
     def skip(self):
         """Track the next level increase and skip it.
@@ -1286,11 +1279,11 @@ class Log:
             log("msg")      # This shows normally at the incremented level
             log.down()      # Level decrements, but no completion message shown
         """
-        if not self._skip_next:
+        if self._skip_next == False:
             # Record the current level where skip was requested
             self._skip_next = 1
-        else:
-            self.warning("skip() already set, ignoring.")
+        # else:
+        #     self.warning("skip() already set, ignoring.")
         return self
     
     # ──────────────────────────────────────────────── mute / un‑mute ──
@@ -1315,7 +1308,7 @@ class Log:
         and updates the visual prefix string for consistent output formatting.
         """
         # Clear the header for the current level before changing
-        self._header_level[self.level] = "..."
+        
         
         # Bounds checking with user warnings
         if new_level >= self.n_buffer:
@@ -1402,12 +1395,13 @@ class Log:
             self.softflag = False
             self.blank()
         self._streamConsole(f"{self.prefix} {message}")
+        
         return self
     def warning(self, message: str):
         if self.DEBUG >= self.level:
             self(f"⛔ {message}")
         else:
-            tree_str = "/".join(self._header_level[: self.level + 1]) + "/"
+            tree_str = "/".join([str(header) for header in self._header_level[:self.level + 1]]) + "/"
             print(f"\n⛔ in {tree_str}:\n ─────> {message}")
         return self
     def softlog(self, message: str):
@@ -1614,6 +1608,7 @@ class Log:
             else:
                 self.log(f"{item_indent}{marker} {formatted_item}")
         self.log(f"{item_indent[:-1]}╰───────────")
+        
         return self
     def _group_items_by_type(self, items):
         """Group items by their type and return organized list."""
@@ -1722,6 +1717,7 @@ class Log:
         
         # Add closing blank line
         self.blank()
+        
         return self
     def _tree_recursive(self, data, level_indent,
                         parent_indent, connector,
@@ -1765,9 +1761,8 @@ class Log:
             
             # Handle list/array
             elif isinstance(value, (list, tuple)) and value:
-                count_info = f"[{len(value)} items]"
                 type_info = f" ({type(value).__name__})" if show_types else ""
-                self.log(f"{level_indent}{this_indent}{branch} {key}{type_info} {count_info}:")
+                self.log(f"{level_indent}{this_indent}{branch} {key}{type_info}:")
                 
                 # Process list items
                 for j, item in enumerate(value):
@@ -2003,6 +1998,7 @@ class Log:
         :param formats: Optional list of string formats (e.g., ':.2f', ':.0%', etc.)
         :return: ConsoleTable instance
         """
+        
         return ConsoleTable(headers, log=self, formats=formats, header = title)
     def progressBar(self, header: str = "Progress") -> ProgressBar:
         """ Create a ProgressBar instance for tracking progress."""
