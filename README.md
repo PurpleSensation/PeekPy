@@ -2,6 +2,103 @@
 
 A hierarchical logging system for Python that handles nested console logs with indentation and clean terminal output.
 
+
+```
+
+      ──────────────────── Welcome to PeekPy ────────────────────
+   Python library for  organised, hierarchical console logging
+   Turns chaotic print statements into structured logs
+   Ready to see how it works?
+    
+
+ ◻ ────────────────────── Core Features ──────────
+ │ ✨ Hierarchical nesting with automatic indentation
+ │ 📊 Built-in tables, progress bars, and trees
+ │ 🎯 Multiple output styles and formatting
+ ◻──────────────────── simple & clean ─────────  • 0.0s
+    
+
+ ◻ ────────────────────── Output Types ──────────
+ │ Standard logging messages and status updates
+ │ Inline messages with emojis and Unicode support
+ │ All types work together to keep asthetic consistency
+ │ Simple yet complete
+ │  
+ │    ────────────────────────────────────────────
+ │ Next is a complete example of output showcase:
+ │
+ │ ◻ ────────────────────── Logging Example ──────────
+ │ │ Operations can be nested using up()/down()
+ │ │ Call log.up(header) to start a new level:
+ │ │
+ │ │ ◻ ────────────────────── level heading ──────────
+ │ │ │ 📥 Loading files - sample msg
+ │ │ │ Collections can be displayed lists:
+ │ │ │ ⚙ Key Benefits:
+ │ │ │     ╰─┬• Intuitive up()/down() pattern
+ │ │ │       ├• Professional console output
+ │ │ │       ├• Debug complex workflows easily
+ │ │ │       ├• Built-in progress tracking
+ │ │ │       ├• Customizable appearance
+ │ │ │       ╰───────────
+ │ │ │ ✅ Validation complete
+ │ │ │
+ │ │ │ ◻ ────────────────────── Processing ──────────
+ │ │ │ │ 🔄 Applying transformations
+ │ │ │ │ 📈 Computing metrics
+ │ │ │ │
+ │ │ │ │ ◻ ────────────────────── Analysis ──────────
+ │ │ │ │ │ 🧮 Running calculations
+ │ │ │ │ │ ⚡ Optimizing parameters
+ │ │ │ │ │ ... also as trees...:
+ │ │ │ │ │   ⚙ sample tree
+ │ │ │ │ │      ─┬○ Logging:                    ─┬○ Output:                  
+ │ │ │ │ │       ╰─┬─ style = minimal (str)      ╰─┬─ format = console (str) 
+ │ │ │ │ │         ├─ debug_level = 1 (int)        ├─ colors = True (bool)   
+ │ │ │ │ │         ╰─┬─ nesting                    ╰─ unicode = True (bool)  
+ │ │ │ │ │           ├─ tables                                               
+ │ │ │ │ │           ╰─ progress                                             
+ │ │ │ │ │                                                                   
+ │ │ │ │ │  
+ │ │ │ │ │ Other tools are present, but less developed
+ │ │ │ │ ◻──────────────────── analysis finished ─────── -  • 0.0s
+ │ │ │ │  
+ │ │ │ │ The object also includes small linting and time registration tools
+ │ │ │ ◻──────────────────── processing finished ─────── -  • 0.0s
+ │ │ │  
+ │ │ │ As well as helper methods to locally modify the log behavior
+ │ │ ◻──────────────────── Pipeline complete ─────────  • 0.1s
+ │ │  
+ │ │ Support for tables:
+ │ │  
+ │ │ ╭──────────────────── sample table ────────────────────╮
+ │ │ │                                                       │
+ │ │ │         Feature         │     Status      │   Rating  │
+ │ │ │  Hierarchical Logging   │     ✅ Ready     │   9.5/10  │
+ │ │ │    Auto-Indentation     │     ✅ Ready     │   9.0/10  │
+ │ │ │   Progress Tracking     │     ✅ Ready     │   8.8/10  │
+ │ │ │       Data Trees        │     ✅ Ready     │   9.2/10  │
+ │ │ ╰───────────────────────────────────────────────────────╯
+ │ │  
+ │ ◻──────────────────── end of example ─────────  • 0.1s
+ │  
+ ◻──────────────────── plus misc tools ─────── -  • 0.2s
+    
+
+ ◻ ────────────────────── Design Philosophy ──────────
+ │ 🎯 Simple: Follow up()/down() pattern
+ │ 🚀 Complete: Tables, trees, progress included
+ │ 🎨 Clean: Professional formatting
+ │ 🔧 Flexible: Customize to your needs
+ ◻──────────────────── built for lazy perfectionists ─────── -  • 0.0s
+    
+
+ ◻ ────────────────────── Getting Started ──────────
+ │ Installation and usage guide below
+ │ This introduction was generated using PeekPy itself
+ ◻──────────────────── Welcome to better console logging! 🎉 ─────────  • 0.0s
+```
+
 ## Quick Start - Multi-Module Logging
 
 For projects that need shared logging across multiple modules, copy the `PeekPy/logSingleton.py` file to your project and use it:

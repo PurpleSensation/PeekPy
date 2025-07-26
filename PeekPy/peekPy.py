@@ -1,4 +1,5 @@
 import math, os, ast, shutil
+from typing import List, Tuple
 from .log import Log
 global log
 log :Log = Log()
