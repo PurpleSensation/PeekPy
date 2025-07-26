@@ -4,99 +4,23 @@ A hierarchical logging system for Python that handles nested console logs with i
 
 
 ```
-
-      ──────────────────── Welcome to PeekPy ────────────────────
-   Python library for  organised, hierarchical console logging
-   Turns chaotic print statements into structured logs
-   Ready to see how it works?
-    
-
- ◻ ────────────────────── Core Features ──────────
- │ ✨ Hierarchical nesting with automatic indentation
- │ 📊 Built-in tables, progress bars, and trees
- │ 🎯 Multiple output styles and formatting
- ◻──────────────────── simple & clean ─────────  • 0.0s
-    
-
- ◻ ────────────────────── Output Types ──────────
- │ Standard logging messages and status updates
- │ Inline messages with emojis and Unicode support
- │ All types work together to keep asthetic consistency
- │ Simple yet complete
+ ◻ ────────────────────── Welcome to PeekPy ──────────
+ │ Python library for  organised, hierarchical console logging
+ │ Turns chaotic print statements into structured logs
+ │ Ready to see how it works?
  │  
- │    ────────────────────────────────────────────
- │ Next is a complete example of output showcase:
  │
- │ ◻ ────────────────────── Logging Example ──────────
- │ │ Operations can be nested using up()/down()
- │ │ Call log.up(header) to start a new level:
- │ │
- │ │ ◻ ────────────────────── level heading ──────────
- │ │ │ 📥 Loading files - sample msg
- │ │ │ Collections can be displayed lists:
- │ │ │ ⚙ Key Benefits:
- │ │ │     ╰─┬• Intuitive up()/down() pattern
- │ │ │       ├• Professional console output
- │ │ │       ├• Debug complex workflows easily
- │ │ │       ├• Built-in progress tracking
- │ │ │       ├• Customizable appearance
- │ │ │       ╰───────────
- │ │ │ ✅ Validation complete
- │ │ │
- │ │ │ ◻ ────────────────────── Processing ──────────
- │ │ │ │ 🔄 Applying transformations
- │ │ │ │ 📈 Computing metrics
- │ │ │ │
- │ │ │ │ ◻ ────────────────────── Analysis ──────────
- │ │ │ │ │ 🧮 Running calculations
- │ │ │ │ │ ⚡ Optimizing parameters
- │ │ │ │ │ ... also as trees...:
- │ │ │ │ │   ⚙ sample tree
- │ │ │ │ │      ─┬○ Logging:                    ─┬○ Output:                  
- │ │ │ │ │       ╰─┬─ style = minimal (str)      ╰─┬─ format = console (str) 
- │ │ │ │ │         ├─ debug_level = 1 (int)        ├─ colors = True (bool)   
- │ │ │ │ │         ╰─┬─ nesting                    ╰─ unicode = True (bool)  
- │ │ │ │ │           ├─ tables                                               
- │ │ │ │ │           ╰─ progress                                             
- │ │ │ │ │                                                                   
- │ │ │ │ │  
- │ │ │ │ │ Other tools are present, but less developed
- │ │ │ │ ◻──────────────────── analysis finished ─────── -  • 0.0s
- │ │ │ │  
- │ │ │ │ The object also includes small linting and time registration tools
- │ │ │ ◻──────────────────── processing finished ─────── -  • 0.0s
- │ │ │  
- │ │ │ As well as helper methods to locally modify the log behavior
- │ │ ◻──────────────────── Pipeline complete ─────────  • 0.1s
- │ │  
- │ │ Support for tables:
- │ │  
- │ │ ╭──────────────────── sample table ────────────────────╮
- │ │ │                                                       │
- │ │ │         Feature         │     Status      │   Rating  │
- │ │ │  Hierarchical Logging   │     ✅ Ready     │   9.5/10  │
- │ │ │    Auto-Indentation     │     ✅ Ready     │   9.0/10  │
- │ │ │   Progress Tracking     │     ✅ Ready     │   8.8/10  │
- │ │ │       Data Trees        │     ✅ Ready     │   9.2/10  │
- │ │ ╰───────────────────────────────────────────────────────╯
- │ │  
- │ ◻──────────────────── end of example ─────────  • 0.1s
+ │ ◻ ────────────────────── Core Features ──────────
+ │ │ ✨ Hierarchical nesting with automatic indentation
+ │ │ 🎯 Simple: Follow up()/down() pattern
+ │ │ ⚙ 📊 Built-in resources:
+ │ │     ╰─┬─ Standard logging and status refresh
+ │ │       ├─ Emojis and Unicode support
+ │ │       ├─ Tables, lists, trees, and progress bars
+ │ │       ╰───────────
+ │ ◻──────────────────── simple & clean ─────────  • 0.0s
  │  
- ◻──────────────────── plus misc tools ─────── -  • 0.2s
-    
-
- ◻ ────────────────────── Design Philosophy ──────────
- │ 🎯 Simple: Follow up()/down() pattern
- │ 🚀 Complete: Tables, trees, progress included
- │ 🎨 Clean: Professional formatting
- │ 🔧 Flexible: Customize to your needs
- ◻──────────────────── built for lazy perfectionists ─────── -  • 0.0s
-    
-
- ◻ ────────────────────── Getting Started ──────────
- │ Installation and usage guide below
- │ This introduction was generated using PeekPy itself
- ◻──────────────────── Welcome to better console logging! 🎉 ─────────  • 0.0s
+ ◻──────────────────── ─── ─────── -  • 0.0s
 ```
 
 ## Quick Start - Multi-Module Logging
@@ -200,8 +124,128 @@ Debug levels control the maximum nesting depth that will show output:
 
 Example: If `DEBUG=1`, you'll see levels 0 and 1, but level 2+ will be silent.
 
-## Other Logging Types
+# Logging Types
+There are various formatted logging tools you can use, here is an example containing the main ones:
+```python
+log("Next is a complete example of output showcase:")
+    log.up("Logging Example") # lvl 1
+    log("Operations can be nested using up()/down()")
+    log("Call log.up(header) to start a new level:")
+    log.up("level heading") # lvl 2
+    log("📥 Loading files - sample msg")
+    list_items = [
+        "Intuitive up()/down() pattern",
+        "Professional console output", 
+        "Debug complex workflows easily",
+        "Built-in progress tracking",
+        "Customizable appearance"
+    ]
+    log("Collections can be displayed lists:")
+    log.list(list_items, header="Key Benefits", style="bullet")
+    log("✅ Validation complete")
+    
+    log.up("Processing") # lvl 3
+    log("🔄 Applying transformations")
+    log("📈 Computing metrics")
+    
+    log.up("Analysis") # lvl 4
+    log("🧮 Running calculations")
+    log("⚡ Optimizing parameters")
+    
+    sample_config = {
+        "logging": {
+            "style": "minimal",
+            "debug_level": 1,
+            "features": ["nesting", "tables", "progress"]
+        },
+        "output": {
+            "format": "console",
+            "colors": True,
+            "unicode": True
+        }
+    }
+    log("... also as trees...:")
+    log.tree(sample_config, header="sample tree", show_types=True)
+    log("Other tools are present, but less developed")
+    log.down("analysis finished") # lvl 3    
+    log("The object also includes small linting and time registration tools")
+    log.down("processing finished") # lvl 2
+    log("As well as helper methods to locally modify the log behavior")
+    log.down("Pipeline complete") # lvl 1
+    # Demonstrate table functionality
+    log("Support for tables:")
+    table = log.consoleTable(
+        headers=["         Feature        ", "    Status     ", "  Rating  "], 
+        formats=["{}", "{}", "{:.1f}/10"],
+        title="sample table"
+    )
+    table.add_row("Hierarchical Logging", "✅ Ready", 9.5)
+    table.add_row("Auto-Indentation", "✅ Ready", 9.0)
+    table.add_row("Progress Tracking", "✅ Ready", 8.8)
+    table.add_row("Data Trees", "✅ Ready", 9.2)
+    table.close()
+    log.down("end of example") # lvl 0
+```
+output:
+```
+ ◻ ────────────────────── Logging Example ──────────
+ │ Operations can be nested using up()/down()
+ │ Call log.up(header) to start a new level:
+ │
+ │ ◻ ────────────────────── level heading ──────────
+ │ │ 📥 Loading files - sample msg
+ │ │ Collections can be displayed lists:
+ │ │ ⚙ Key Benefits:
+ │ │     ╰─┬• Intuitive up()/down() pattern
+ │ │       ├• Professional console output
+ │ │       ├• Debug complex workflows easily
+ │ │       ├• Built-in progress tracking
+ │ │       ├• Customizable appearance
+ │ │       ╰───────────
+ │ │ ✅ Validation complete
+ │ │
+ │ │ ◻ ────────────────────── Processing ──────────
+ │ │ │ 🔄 Applying transformations
+ │ │ │ 📈 Computing metrics
+ │ │ │
+ │ │ │ ◻ ────────────────────── Analysis ──────────
+ │ │ │ │ 🧮 Running calculations
+ │ │ │ │ ⚡ Optimizing parameters
+ │ │ │ │ ... also as trees...:
+ │ │ │ │   ⚙ sample tree
+ │ │ │ │      ─┬○ Logging:                    ─┬○ Output:                  
+ │ │ │ │       ╰─┬─ style = minimal (str)      ╰─┬─ format = console (str) 
+ │ │ │ │         ├─ debug_level = 1 (int)        ├─ colors = True (bool)   
+ │ │ │ │         ╰─┬─ nesting                    ╰─ unicode = True (bool)  
+ │ │ │ │           ├─ tables                                               
+ │ │ │ │           ╰─ progress                                             
+ │ │ │ │                                                                   
+ │ │ │ │  
+ │ │ │ │ Other tools are present, but less developed
+ │ │ │ ◻──────────────────── analysis finished ─────────  • 0.0s
+ │ │ │  
+ │ │ │ The object also includes small linting and time registration tools
+ │ │ ◻──────────────────── processing finished ─────────  • 0.0s
+ │ │  
+ │ │ As well as helper methods to locally modify the log behavior
+ │ ◻──────────────────── Pipeline complete ─────── -  • 0.1s
+ │  
+ │ Support for tables:
+ │  
+ │ ╭──────────────────── sample table ────────────────────╮
+ │ │                                                       │
+ │ │         Feature         │     Status      │   Rating  │
+ │ │  Hierarchical Logging   │     ✅ Ready     │   9.5/10  │
+ │ │    Auto-Indentation     │     ✅ Ready     │   9.0/10  │
+ │ │   Progress Tracking     │     ✅ Ready     │   8.8/10  │
+ │ │       Data Trees        │     ✅ Ready     │   9.2/10  │
+ │ ╰───────────────────────────────────────────────────────╯
+ │  
+ ◻──────────────────── end of example ─────── -  • 0.1s
+```
 
+
+### Print messages
 ```python
 log.log("Regular message")           # Standard log
 log.softlog("Status update")         # Overwrites previous line
@@ -210,7 +254,7 @@ log.warning("Something's wrong")     # Warning message
 log.blank()                          # Empty line
 ```
 
-## Console Tables
+### Console Tables
 
 ```python
 table = log.consoleTable(
@@ -223,7 +267,7 @@ table.add_row("Item2", 2.71828, "PASS")
 table.close()
 ```
 
-## Lists and Trees
+### Lists and Trees
 
 ```python
 # List items with various formatting options
@@ -241,7 +285,7 @@ log.itemize([
 ], "Status Updates")
 ```
 
-## Progress Bars
+### Progress Bars
 
 ```python
 progress = log.progressBar(header="Processing")
