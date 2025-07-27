@@ -125,66 +125,117 @@ Debug levels control the maximum nesting depth that will show output:
 Example: If `DEBUG=1`, you'll see levels 0 and 1, but level 2+ will be silent.
 
 # Logging Types
-There are various formatted logging tools you can use, here is an example containing the main ones:
+There are various formatted logging tools you can use:
+
+
+
+### Print messages
+```python
+log.log("Regular message")           # Standard log
+log.softlog("Status update")         # Overwrites previous line
+log.inline("continued...")           # Continues current line
+log.warning("Something's wrong")     # Warning message
+log.blank()                          # Empty line
+```
+
+### Console Tables
+
+```python
+table = log.consoleTable(
+    headers=["Name", "Value", "Status"], 
+    formats=["{}", "{:.2f}", "{}"],
+    title="Results"
+)
+table.add_row("Item1", 3.14159, "OK")
+table.add_row("Item2", 2.71828, "PASS") 
+table.close()
+```
+
+### Lists and Trees
+
+```python
+# List items with various formatting options
+log.list(["item1", "item2", "item3"], header="My Items", style="dash")
+
+# Display nested data as a tree structure  
+data = {"config": {"db": "localhost", "port": 5432}, "status": "active"}
+log.tree(data, header="Configuration", show_types=True)
+
+# Simple itemized lists
+log.itemize([
+    "Process started",
+    "Data loaded", 
+    "Calculations complete"
+], "Status Updates")
+```
+
+### Progress Bars
+
+```python
+progress = log.progressBar(header="Processing")
+# Use progress methods for tracking long operations
+```
+
+## Example:
 ```python
 log("Next is a complete example of output showcase:")
-    log.up("Logging Example") # lvl 1
-    log("Operations can be nested using up()/down()")
-    log("Call log.up(header) to start a new level:")
-    log.up("level heading") # lvl 2
-    log("📥 Loading files - sample msg")
-    list_items = [
-        "Intuitive up()/down() pattern",
-        "Professional console output", 
-        "Debug complex workflows easily",
-        "Built-in progress tracking",
-        "Customizable appearance"
-    ]
-    log("Collections can be displayed lists:")
-    log.list(list_items, header="Key Benefits", style="bullet")
-    log("✅ Validation complete")
-    
-    log.up("Processing") # lvl 3
-    log("🔄 Applying transformations")
-    log("📈 Computing metrics")
-    
-    log.up("Analysis") # lvl 4
-    log("🧮 Running calculations")
-    log("⚡ Optimizing parameters")
-    
-    sample_config = {
-        "logging": {
-            "style": "minimal",
-            "debug_level": 1,
-            "features": ["nesting", "tables", "progress"]
-        },
-        "output": {
-            "format": "console",
-            "colors": True,
-            "unicode": True
-        }
+log.up("Logging Example") # lvl 1
+log("Operations can be nested using up()/down()")
+log("Call log.up(header) to start a new level:")
+log.up("level heading") # lvl 2
+log("📥 Loading files - sample msg")
+list_items = [
+    "Intuitive up()/down() pattern",
+    "Professional console output", 
+    "Debug complex workflows easily",
+    "Built-in progress tracking",
+    "Customizable appearance"
+]
+log("Collections can be displayed lists:")
+log.list(list_items, header="Key Benefits", style="bullet")
+log("✅ Validation complete")
+
+log.up("Processing") # lvl 3
+log("🔄 Applying transformations")
+log("📈 Computing metrics")
+
+log.up("Analysis") # lvl 4
+log("🧮 Running calculations")
+log("⚡ Optimizing parameters")
+
+sample_config = {
+    "logging": {
+        "style": "minimal",
+        "debug_level": 1,
+        "features": ["nesting", "tables", "progress"]
+    },
+    "output": {
+        "format": "console",
+        "colors": True,
+        "unicode": True
     }
-    log("... also as trees...:")
-    log.tree(sample_config, header="sample tree", show_types=True)
-    log("Other tools are present, but less developed")
-    log.down("analysis finished") # lvl 3    
-    log("The object also includes small linting and time registration tools")
-    log.down("processing finished") # lvl 2
-    log("As well as helper methods to locally modify the log behavior")
-    log.down("Pipeline complete") # lvl 1
-    # Demonstrate table functionality
-    log("Support for tables:")
-    table = log.consoleTable(
-        headers=["         Feature        ", "    Status     ", "  Rating  "], 
-        formats=["{}", "{}", "{:.1f}/10"],
-        title="sample table"
-    )
-    table.add_row("Hierarchical Logging", "✅ Ready", 9.5)
-    table.add_row("Auto-Indentation", "✅ Ready", 9.0)
-    table.add_row("Progress Tracking", "✅ Ready", 8.8)
-    table.add_row("Data Trees", "✅ Ready", 9.2)
-    table.close()
-    log.down("end of example") # lvl 0
+}
+log("... also as trees...:")
+log.tree(sample_config, header="sample tree", show_types=True)
+log("Other tools are present, but less developed")
+log.down("analysis finished") # lvl 3    
+log("The object also includes small linting and time registration tools")
+log.down("processing finished") # lvl 2
+log("As well as helper methods to locally modify the log behavior")
+log.down("Pipeline complete") # lvl 1
+# Demonstrate table functionality
+log("Support for tables:")
+table = log.consoleTable(
+    headers=["         Feature        ", "    Status     ", "  Rating  "], 
+    formats=["{}", "{}", "{:.1f}/10"],
+    title="sample table"
+)
+table.add_row("Hierarchical Logging", "✅ Ready", 9.5)
+table.add_row("Auto-Indentation", "✅ Ready", 9.0)
+table.add_row("Progress Tracking", "✅ Ready", 8.8)
+table.add_row("Data Trees", "✅ Ready", 9.2)
+table.close()
+log.down("end of example") # lvl 0
 ```
 output:
 ```
@@ -243,55 +294,6 @@ output:
  │  
  ◻──────────────────── end of example ─────── -  • 0.1s
 ```
-
-
-### Print messages
-```python
-log.log("Regular message")           # Standard log
-log.softlog("Status update")         # Overwrites previous line
-log.inline("continued...")           # Continues current line
-log.warning("Something's wrong")     # Warning message
-log.blank()                          # Empty line
-```
-
-### Console Tables
-
-```python
-table = log.consoleTable(
-    headers=["Name", "Value", "Status"], 
-    formats=["{}", "{:.2f}", "{}"],
-    title="Results"
-)
-table.add_row("Item1", 3.14159, "OK")
-table.add_row("Item2", 2.71828, "PASS") 
-table.close()
-```
-
-### Lists and Trees
-
-```python
-# List items with various formatting options
-log.list(["item1", "item2", "item3"], header="My Items", style="dash")
-
-# Display nested data as a tree structure  
-data = {"config": {"db": "localhost", "port": 5432}, "status": "active"}
-log.tree(data, header="Configuration", show_types=True)
-
-# Simple itemized lists
-log.itemize([
-    "Process started",
-    "Data loaded", 
-    "Calculations complete"
-], "Status Updates")
-```
-
-### Progress Bars
-
-```python
-progress = log.progressBar(header="Processing")
-# Use progress methods for tracking long operations
-```
-
 ## That's it
 
 Simple hierarchical logging for console output. The system handles nesting automatically - just follow the `up()`/`down()` pattern and it tracks indentation levels for you.
