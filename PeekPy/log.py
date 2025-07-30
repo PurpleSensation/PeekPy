@@ -1399,10 +1399,11 @@ class Log:
         return self
     def warning(self, message: str):
         if self.DEBUG >= self.level:
-            self(f"⛔ {message}")
+            self(f"⚠️ {message}")
         else:
             tree_str = "/".join([str(header) for header in self._header_level[:self.level + 1]]) + "/"
-            print(f"\n⛔ in {tree_str}:\n ─────> {message}")
+            print(f"\n{self.prefix[:-1]} in {tree_str}:"
+                  f"\n{self.prefix[:-1]} ─────> ⚠️ {message}")
         return self
     def softlog(self, message: str):
         if self.muted or self.DEBUG < self.level:
